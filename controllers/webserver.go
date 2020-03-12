@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
+	"gotodo/models"
+	"io/ioutil"
 	"net/http"
-	"strconv"
 )
 
 type Ping struct {
@@ -21,19 +21,23 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
-	length, _ := strconv.Atoi(r.Header.Get("Content-Length"))
-	body := make([]byte, length)
-	length, _ = r.Body.Read(body)
-	var jsonBody map[string]interface{}
-	json.Unmarshal(body[:length], &jsonBody)
-	fmt.Printf("%v\n", jsonBody)
+	body, _ := ioutil.ReadAll(r.Body)
+	var  todo models.ToDo
+	json.Unmarshal(body, &todo)
+	result := todo.Create()
+	if result {
+		http.Error(w, "incalid access!!", http.StatusInternalServerError)
+	} else {
+		ReturnStatusOk(w)
+	}
+}
 
+func ReturnStatusOk(w http.ResponseWriter) {
 	ping := Ping{http.StatusOK, "ok" }
 	res, _ := json.Marshal(ping)
 	w.Header().Set("Content-type", "application/json")
 	w.Write(res)
 }
-
 
 func StartWebServer() {
 	router := mux.NewRouter()
