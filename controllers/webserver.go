@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type Ping struct {
@@ -37,15 +38,19 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	todo := models.JsonToTodoStruct(body)
 	err := todo.Save()
 	if err != nil {
-		log.Println("失敗")
 		http.Error(w, "Invalid access!!", http.StatusInternalServerError)
 	} else {
-		log.Println("成功")
 		ReturnStatusOk(w)
 	}
 }
 
-
+func deleteHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+	log.Println(id)
+	todo := models.GetTodo( id )
+	todo.Delete()
+}
 
 func ReturnStatusOk(w http.ResponseWriter) {
 	ping := Ping{http.StatusOK, "ok" }
@@ -59,6 +64,7 @@ func StartWebServer() {
 	router.HandleFunc("/index/", indexHandler).Methods("GET")
 	router.HandleFunc("/create/", createHandler).Methods("POST")
 	router.HandleFunc("/update/", updateHandler).Methods("POST")
+	router.HandleFunc("/delete/{id:[0-9]+}/", deleteHandler).Methods("DELETE")
 	http.ListenAndServe(":8080", router)
 }
 
