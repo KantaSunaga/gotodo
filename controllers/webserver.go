@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"gotodo/models"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -22,12 +23,13 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
-	var  todo models.ToDo
-	json.Unmarshal(body, &todo)
-	result := todo.Create()
-	if result {
-		http.Error(w, "incalid access!!", http.StatusInternalServerError)
+	todo := models.NewTodo(body)
+	err := todo.Save()
+	if err != nil {
+		log.Println("失敗")
+		http.Error(w, "Invalid access!!", http.StatusInternalServerError)
 	} else {
+		log.Println("成功")
 		ReturnStatusOk(w)
 	}
 }
