@@ -21,9 +21,20 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
+func updateHandler(w http.ResponseWriter, r *http.Request) {
+	body, _ := ioutil.ReadAll(r.Body)
+	todo := models.JsonToTodoStruct(body)
+	err := todo.Update()
+	if err != nil {
+		http.Error(w, "Invalid access!!", http.StatusInternalServerError)
+	} else {
+		ReturnStatusOk(w)
+	}
+}
+
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
-	todo := models.NewTodo(body)
+	todo := models.JsonToTodoStruct(body)
 	err := todo.Save()
 	if err != nil {
 		log.Println("失敗")
@@ -33,6 +44,8 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		ReturnStatusOk(w)
 	}
 }
+
+
 
 func ReturnStatusOk(w http.ResponseWriter) {
 	ping := Ping{http.StatusOK, "ok" }
@@ -45,6 +58,7 @@ func StartWebServer() {
 	router := mux.NewRouter()
 	router.HandleFunc("/index/", indexHandler).Methods("GET")
 	router.HandleFunc("/create/", createHandler).Methods("POST")
+	router.HandleFunc("/update/", updateHandler).Methods("POST")
 	http.ListenAndServe(":8080", router)
 }
 
