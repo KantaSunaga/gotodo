@@ -32,6 +32,29 @@ func (td *ToDo) Update() error {
 	return err
 }
 
+func (td *ToDo) Delete() error {
+	query := fmt.Sprintf(`
+		DELETE FROM todos WHERE id = ?
+	`)
+	_, err := Dbconecction.Exec(query, td.Id)
+	if err != nil{
+		log.Println(err)
+	}
+	return err
+}
+
+func GetTodo(id int) ToDo{
+	query := fmt.Sprintf(`SELECT * FROM todos WHERE id = ?`)
+	row := Dbconecction.QueryRow(query, id)
+	var todo ToDo
+	err := row.Scan(&todo.Id, &todo.Title, &todo.Body, &todo.Done)
+	if err != nil {
+		log.Println(err)
+	}
+	return todo
+}
+
+
 func (td *ToDo) Save() error {
 	query := fmt.Sprintf(`
 		INSERT INTO todos (title, body, done) VALUES (?,?,?)
