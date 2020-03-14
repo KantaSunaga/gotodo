@@ -48,8 +48,14 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	log.Println(id)
-	todo := models.GetTodo( id )
-	todo.Delete()
+	todo, err := models.GetTodo( id )
+	if err != nil {
+		log.Println("todo not found")
+		http.Error(w, "todo not found", http.StatusInternalServerError)
+	} else {
+		todo.Delete()
+		ReturnStatusOk(w)
+	}
 }
 
 func ReturnStatusOk(w http.ResponseWriter) {
@@ -58,6 +64,7 @@ func ReturnStatusOk(w http.ResponseWriter) {
 	w.Header().Set("Content-type", "application/json")
 	w.Write(res)
 }
+
 
 func StartWebServer() {
 	router := mux.NewRouter()

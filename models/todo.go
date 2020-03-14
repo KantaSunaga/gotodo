@@ -38,12 +38,13 @@ func (td *ToDo) Delete() error {
 	`)
 	_, err := Dbconecction.Exec(query, td.Id)
 	if err != nil{
+		log.Println("Delete")
 		log.Println(err)
 	}
 	return err
 }
 
-func GetTodo(id int) ToDo{
+func GetTodo(id int) (ToDo, error){
 	query := fmt.Sprintf(`SELECT * FROM todos WHERE id = ?`)
 	row := Dbconecction.QueryRow(query, id)
 	var todo ToDo
@@ -51,7 +52,7 @@ func GetTodo(id int) ToDo{
 	if err != nil {
 		log.Println(err)
 	}
-	return todo
+	return todo, err
 }
 
 
