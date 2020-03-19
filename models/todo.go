@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+   "database/sql"
 )
 
 type ToDo struct{
@@ -55,7 +56,6 @@ func GetTodo(id int) (ToDo, error){
 	return todo, err
 }
 
-
 func (td *ToDo) Save() error {
 	query := fmt.Sprintf(`
 		INSERT INTO todos (title, body, done) VALUES (?,?,?)
@@ -65,4 +65,19 @@ func (td *ToDo) Save() error {
 		log.Println(err)
 	}
 	return err
+}
+
+func GetAllTodo( done bool ) ([]ToDo) {
+	query := fmt.Sprintf(`SELECT * FROM todos WHERE done = ?`)
+	rows := Dbconecction.QueryRow(query, done)
+	var todos []ToDo
+	for rows.Next()  {
+		var todo ToDo
+		err := rows.Scan(&todo.Id, &todo.Title, &todo.Body, &todo.Done)
+		if err != nil {
+			log.Println(err)
+		}
+		todos = append(todos, todo)
+	}
+	return todos
 }
