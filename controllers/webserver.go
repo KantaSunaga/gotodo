@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"reflect"
 	"strconv"
 )
 
@@ -16,10 +17,14 @@ type Ping struct {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	ping := Ping{http.StatusOK, "ok" }
-	res, _ := json.Marshal(ping)
+	todos := models.GetAllTodo(false)
+	undones := models.GetAllTodo(true)
+	AllTodos := map[string][]models.ToDo
+	AllTodos["todos"] = todos
+	AllTodos["undones"] = undones
 	w.Header().Set("Content-type", "application/json")
-	w.Write(res)
+	respBody, _ := json.Marshal(AllTodos)
+	w.Write(respBody)
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
